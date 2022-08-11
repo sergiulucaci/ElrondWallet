@@ -2,12 +2,12 @@ import * as React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import Welcome from 'src/features/welcome/Welcome';
-import Wallet from 'src/features/wallet/Wallet';
+import Welcome from 'src/features/welcome/containers/Welcome';
+import Wallet from 'src/features/wallet/containers/Wallet';
 
 export type RootStackParamList = {
   Welcome: undefined;
-  Wallet: undefined;
+  Wallet: {address: string};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
