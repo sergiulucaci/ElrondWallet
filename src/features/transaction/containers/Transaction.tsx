@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, TextInput} from 'react-native';
+import {Platform, StyleSheet, TextInput} from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
 import {LargeText, MediumText} from 'src/components/text';
@@ -152,6 +152,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: 'white',
     width: '100%',
+    height: Platform.OS === 'ios' ? 'auto' : 32,
   },
   label: {
     alignSelf: 'flex-start',

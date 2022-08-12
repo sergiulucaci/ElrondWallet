@@ -131,7 +131,7 @@ const Wallet = () => {
         disabled={!(walletAccount.address && parseFloat(walletAccount.balance))}
         onPress={onSendTransaction}
       />
-      <LargeText style={styles.largeText} text="Last 10 transactions" />
+      <LargeText style={styles.largeText} text="Last transactions" />
       <View style={styles.transactions}>
         {getTransactionsIsLoading ? (
           <MediumText text="Loading..." />
