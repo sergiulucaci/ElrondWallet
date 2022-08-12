@@ -1,3 +1,3 @@
-export {default as LargeText} from './large';
-export {default as MediumText} from './medium';
-export {default as SmallText} from './small';
+export {default as LargeText} from './Large';
+export {default as MediumText} from './Medium';
+export {default as SmallText} from './Small';

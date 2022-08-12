@@ -43,7 +43,9 @@ const Confirmation = () => {
 
   useEffect(() => {
     if (txHash) {
-      fireGetTransaction();
+      setTimeout(() => {
+        fireGetTransaction();
+      }, 1000);
     }
   }, [txHash]);
 
@@ -60,11 +62,9 @@ const Confirmation = () => {
 
   return (
     <ScreenContainer>
-      {getTransactionIsLoading ? (
-        <MediumText text="Loading..." />
-      ) : (
+      <LargeText style={styles.largeText} text={`${value} EeGLD`} />
+      {transaction.status && !getTransactionIsLoading ? (
         <>
-          <LargeText style={styles.largeText} text={`${value} EeGLD`} />
           <MediumText
             text={
               transaction.status === 'success'
@@ -75,20 +75,22 @@ const Confirmation = () => {
             }
           />
           <SmallText style={styles.smallText} text={receiver} />
-
-          <MediumText style={styles.mediumText} text="TX Hash" />
-          <SmallText style={styles.smallText} text={txHash} />
-
-          <Button
-            containerStyle={styles.buttonContainer}
-            onPress={onViewInExplorer}
-            text="View in explorer"
-            textStyle={styles.buttonText}
-          />
-
-          <Button text="Back to Wallet" onPress={onBackToWallet} />
         </>
+      ) : (
+        <MediumText text="Loading..." />
       )}
+
+      <MediumText style={styles.mediumText} text="TX Hash" />
+      <SmallText style={styles.smallText} text={txHash} />
+
+      <Button
+        containerStyle={styles.buttonContainer}
+        onPress={onViewInExplorer}
+        text="View in explorer"
+        textStyle={styles.buttonText}
+      />
+
+      <Button text="Back to Wallet" onPress={onBackToWallet} />
     </ScreenContainer>
   );
 };
