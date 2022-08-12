@@ -1,6 +1,5 @@
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 
-// Style Guide for colors
 export const darker = Colors.darker;
 export const lighter = Colors.lighter;
 export const dark = Colors.dark;

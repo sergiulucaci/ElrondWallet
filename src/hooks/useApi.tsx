@@ -17,7 +17,6 @@ const useApi = ({methodToCall}: Props): DataToReturn => {
   const [data, setData] = useState({});
 
   const fireRequest = useCallback(async () => {
-    console.log('=== request...', methodToCall);
     setIsLoading(true);
     try {
       const response = await methodToCall();
@@ -29,7 +28,6 @@ const useApi = ({methodToCall}: Props): DataToReturn => {
       }
       setIsLoading(false);
     } catch (e: any) {
-      console.log('== error : ', e);
       setError(e?.message || JSON.stringify(e));
       setIsLoading(false);
     }

@@ -5,19 +5,15 @@ export type Account = {
   address: string;
   balance: string;
   nonce: number;
-  shard: number;
-  txCount: number;
-  scrCount: number;
-  developerReward: string;
 };
 
-export type Transaction = {
+export type AccountTransaction = {
   txHash: string;
   timestamp: number;
   value: number;
   sender: string;
   receiver: string;
-  status: string;
+  status: 'success' | 'pending' | 'invalid';
 };
 
 export function getAccount(address: string): Promise<Account> {
@@ -30,9 +26,11 @@ export function getAccount(address: string): Promise<Account> {
   return callApi(apiConfig);
 }
 
-export function getTransactions(address: string): Promise<Array<Transaction>> {
+export function getTransactions(
+  address: string,
+): Promise<Array<AccountTransaction>> {
   const apiConfig: {url: string; method: 'get'; baseURL: string} = {
-    url: `/accounts/erd1n8dlrhj75lyw6qsz6h9lfw3ytsp7v4zww9cr3h3m4s40ezug7f5stt646y/transactions`,
+    url: `/accounts/${address}/transactions`,
     baseURL: config.api.elrondApi,
     method: 'get',
   };

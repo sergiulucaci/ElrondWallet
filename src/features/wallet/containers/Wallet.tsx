@@ -1,25 +1,31 @@
-import React, {useEffect} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {RouteProp, useRoute} from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
+import {Clipboard, StyleSheet, View} from 'react-native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 
 import {
   type Account,
+  type AccountTransaction,
   getAccount,
   getTransactions,
-  Transaction,
 } from 'src/features/wallet/api';
 import {LargeText, MediumText, SmallText} from 'src/components/text';
 import ScreenContainer from 'src/components/screenContainer/ScreenContainer';
 import Button from 'src/components/button/Button';
 import useApi from 'src/hooks/useApi';
-import {RootStackParamList} from 'src/navigation/AppNavigation';
+import {
+  NativeStackNavigationProp,
+  RootStackParamList,
+} from 'src/navigation/AppNavigation';
 import {GRAY, GRAY2} from 'src/theme/colors';
 
-type NavigationProp = RouteProp<RootStackParamList>;
+type WalletRouteProp = RouteProp<RootStackParamList, 'Wallet'>;
 
 const Wallet = () => {
-  const route = useRoute<NavigationProp>();
-  const address = route?.params?.address;
+  const navigation = useNavigation<NativeStackNavigationProp>();
+  const [addressCopied, setAddressCopied] = useState(false);
+  const route = useRoute<WalletRouteProp>();
+  const {address, mnemonic} = route?.params || {};
 
   const onGetWalletAccount = async () => {
     // @ts-ignore
@@ -28,7 +34,7 @@ const Wallet = () => {
 
   const {
     error: getWalletAccountError,
-    data: getWalletAccountData,
+    data: WAData,
     fireRequest: fireGetWalletAccount,
   }: {
     error: string;
@@ -38,7 +44,13 @@ const Wallet = () => {
     methodToCall: onGetWalletAccount,
   });
 
-  const onGetTrasanctions = async () => {
+  const walletAccount = WAData || {
+    address: '',
+    balance: '',
+    nonce: 0,
+  };
+
+  const onGetTransactions = async () => {
     // @ts-ignore
     return await getTransactions(address);
   };
@@ -46,30 +58,44 @@ const Wallet = () => {
   const {
     isLoading: getTransactionsIsLoading,
     error: getTransactionsError,
-    data: getTransactionsData,
+    data: TData,
     fireRequest: fireGetTransactions,
   }: {
     isLoading: boolean;
     error: string;
-    data?: Array<Transaction>;
+    data?: Array<AccountTransaction>;
     fireRequest: Function;
   } = useApi({
-    methodToCall: onGetTrasanctions,
+    methodToCall: onGetTransactions,
   });
 
-  const walletAccount = getWalletAccountData || {
-    address: '',
-    balance: '',
-  };
-
-  const transactions = getTransactionsData || [];
+  const transactions = TData || [];
 
   useEffect(() => {
     if (address) {
+    }
+  }, [address]);
+
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused && address) {
       fireGetWalletAccount();
       fireGetTransactions();
     }
-  }, [address]);
+  }, [address, isFocused]);
+
+  const onAddressCopy = () => {
+    // @ts-ignore
+    Clipboard.setString(address);
+    setAddressCopied(true);
+  };
+
+  const onSendTransaction = () => {
+    navigation.navigate('Transaction', {account: walletAccount, mnemonic});
+  };
+
+  console.log(transactions);
 
   return (
     <ScreenContainer>
@@ -77,21 +103,34 @@ const Wallet = () => {
         <View style={styles.section}>
           <LargeText text="Address" />
           <MediumText text={address} style={styles.text} />
+          <Button
+            containerStyle={styles.grayButton}
+            text={addressCopied ? 'Copied' : 'Copy address'}
+            onPress={onAddressCopy}
+          />
         </View>
       ) : null}
       {walletAccount.address ? (
         <View style={styles.section}>
           <LargeText text="Balance" />
           <MediumText
-            text={`${walletAccount.balance} XeGLD`}
+            text={`${
+              walletAccount.balance
+                ? parseFloat(walletAccount.balance) / 1e18
+                : 0
+            } XeGLD`}
             style={styles.text}
           />
         </View>
       ) : null}
       {getWalletAccountError ? (
-        <MediumText text={getWalletAccountError} />
+        <MediumText text={`API: ${getWalletAccountError}`} error />
       ) : null}
-      <Button text="Send transaction" disabled={true} onPress={() => {}} />
+      <Button
+        text="Send transaction"
+        disabled={!(walletAccount.address && parseFloat(walletAccount.balance))}
+        onPress={onSendTransaction}
+      />
       <LargeText style={styles.largeText} text="Last 10 transactions" />
       <View style={styles.transactions}>
         {getTransactionsIsLoading ? (
@@ -99,19 +138,17 @@ const Wallet = () => {
         ) : transactions.length ? (
           transactions.map(t => (
             <View key={t.txHash} style={styles.transaction}>
+              <SmallText text={`value: ${t.value ? t.value / 1e18 : 0}`} />
               <SmallText text={`txHash: ${t.txHash}`} />
-              <SmallText text={new Date(t.timestamp).toLocaleString()} />
-              {/*<SmallText text={`value: ${t.value}`} />*/}
-              {/*<SmallText text={`sender: ${t.sender}`} />*/}
-              {/*<SmallText text={`receiver: ${t.receiver}`} />*/}
               <SmallText text={`status: ${t.status}`} />
+              <SmallText text={new Date(t.timestamp * 1000).toLocaleString()} />
             </View>
           ))
         ) : (
-          <MediumText text="No transactions for current address" />
+          <MediumText text="No transactions yet" />
         )}
         {getTransactionsError ? (
-          <MediumText text={getTransactionsError} />
+          <MediumText text={`API: ${getTransactionsError}`} />
         ) : null}
       </View>
     </ScreenContainer>
@@ -138,6 +175,9 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderTopWidth: 1,
     borderTopColor: GRAY2,
+  },
+  grayButton: {
+    backgroundColor: GRAY,
   },
 });
 
