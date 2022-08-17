@@ -4,10 +4,10 @@ import {TextInput} from 'react-native';
 import renderer, {act} from 'react-test-renderer';
 
 // TODO: import mnemonicWords
-// import {mnemonicWords} from '@elrondnetwork/dapp-core/constants';
+import {mnemonicWords} from '@elrondnetwork/dapp-core/constants';
 
-const mnemonicWords =
-  'will minute summer mass topic hat magnet ball secret furnace sure pill high visa gallery garment uncle museum moon group void tornado then exile';
+// const mnemonicWords =
+//   'will minute summer mass topic hat magnet ball secret furnace sure pill high visa gallery garment uncle museum moon group void tornado then exile';
 
 import Button from 'src/components/button/Button';
 import {MediumText} from 'src/components/text';
@@ -62,7 +62,7 @@ describe('Welcome screen', () => {
   it('mnemonic validation - valid', () => {
     const MnemonicInput = containerInstance.findAllByType(TextInput)[0];
 
-    const text = mnemonicWords;
+    const text = mnemonicWords.slice(0, 24).join(' ');
     act(() => MnemonicInput.props.onChangeText(text));
 
     const ErrorMessage = containerInstance.findAllByType(MediumText)[0];
